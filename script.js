@@ -2,11 +2,9 @@ console.log('loaded');
 
 
 
-
-
-function ztGet(uri) {
+function ztReq(uri, type="GET") {
 	fetch('http://127.0.0.1:9993/' + uri, {
-		method: 'GET',
+		method: type,
 		headers: {
 			'X-ZT1-Auth': '',
 		},
@@ -22,8 +20,6 @@ function ztGet(uri) {
 		}
 	}).then(function (data) {
 		
-		
-
 		// This is the JSON from our response
 		console.log(data);
 		document.getElementById('ztgui').innerHTML = JSON.stringify(data);
