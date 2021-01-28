@@ -9,13 +9,17 @@
     <title>ztgui</title>
 </head>
 <body>
-    <button onclick="ztReq('status')">status</button>
-    <button onclick="ztReq('peer')">peer</button>
-    <button onclick="ztReq('network')">network</button>
-    <button onclick="ztReq('moon')">moon</button>
-    <div id="ztgui"></div>
+    
+    <div id="ztgui">
+        <button onclick="ztReq('status')">status</button>
+        <button onclick="ztReq('peer')">peer</button>
+        <button onclick="ztReq('network')">network</button>
+        <button onclick="ztReq('moon')">moon</button>
+        <button onclick="addNode()">add node</button>
+    </div>
     <div id="cy"></div>
+    
 </body>
 <script src="script.js"></script>
-<script src="ztcyto.js"></script>
+<!-- <script src="ztcyto.js"></script> -->
 </html>
