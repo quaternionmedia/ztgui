@@ -56,10 +56,11 @@ var db = {
 var ngc = db.i.n;
 var egc = db.i.e;
 
-function addNode(name, data={}, x=db.x, y=db.y) {
+function addNode(name, data={}, nx=db.x, ny=db.y, locked=false) {
 	var r = cy.add({group: 'nodes',
 					data: {id:'n'+ngc, name:name, ...data},
-					position: { x: x, y: y }})
+					position: { x: nx, y: ny },
+					locked:locked})
 	ngc++;
 	return r;	
 }
@@ -72,18 +73,48 @@ function addEdge(s,t) {
 	egc++;
 }
 
-function grid() {
-	cy.layout({name:'null'}).run()
-	cy.layout({
-		name: 'grid'
-	  }).run();
+function orderDisplay(layout='grid') {
+	var options = {
+		name: layout,
+		animate: false, // whether to animate changes to the layout
+		animationDuration: 50, // duration of animation in ms, if enabled
+		animationEasing: false, // easing of animation, if enabled
+		animateFilter: function ( node, i ){ return true; }, // a function that determines whether the node should be animated.
+		  // All nodes animated by default for `animate:true`.  Non-animated nodes are positioned immediately when the layout starts.
+		// eles: someCollection, // collection of elements involved in the layout; set by cy.layout() or eles.layout()
+		fit: true, // whether to fit the viewport to the graph
+		padding: 30, // padding to leave between graph and viewport
+		pan: undefined, // pan the graph to the provided position, given as { x, y }
+		ready: undefined, // callback for the layoutready event
+		stop: undefined, // callback for the layoutstop event
+		spacingFactor: 1, // a positive value which adjusts spacing between nodes (>1 means greater than usual spacing)
+		transform: function (node, position ){ return position; }, // transform a given node position. Useful for changing flow direction in discrete layouts
+		zoom: undefined // zoom level as a positive number to set after animation
+	  }
+	
+	cy.filter('node[type != "menu"]').layout(options).run();
+}
+
+function orderMenu() {
+	var omi = 1;
+	var options = {
+		name: 'concentric',
+		fit: false,
+		boundingBox: {x1:0,y1:0,x2:100,y2:100}
+  		// positions: function(node){
+
+		// 	  return {x:db.x+omi++*db.g,y:db.y}
+		//   },
+	  }
+	
+	cy.filter('node[type = "menu"]').layout(options).run();
 }
 
 function ztReq(uri, type="GET") {
 	fetch('http://127.0.0.1:9993/' + uri, {
 		method: type,
 		headers: {
-			'X-ZT1-Auth': '',
+			'X-ZT1-Auth': 'nagek6netnzqvyxf052qze4y',
 		},
 		// mode: 'no-cors',
 		referrer: 'no-referrer'
@@ -97,15 +128,18 @@ function ztReq(uri, type="GET") {
 		}
 	}).then(function (resp) {
 		// This is the JSON from our response
-		console.log(resp);
+		// console.log(resp);
 		var i = 0;
 		for (var key in resp) {
 			if (resp.hasOwnProperty(key)) {
-				console.log(key + " -> " + resp[key]);
-				addNode(resp, uri);
+				// console.log(key + " -> " + resp[key]);
+				// console.log(resp, key, resp[key])
+				addNode(uri, {'type':'response', ...resp[key]});
 			}
 			i++;
 		}
+		orderDisplay()
+		orderMenu()
 		// document.getElementById('ztgui').innerHTML = JSON.stringify(resp);
 	}).catch(function (err) {
 		// There was an error
@@ -114,11 +148,20 @@ function ztReq(uri, type="GET") {
 }
 
 
-var ztgui = addNode('ztgui', x=0, y=0)
+var ztgui = addNode('ztgui')
 ztgui.hide();
-var menuNode = addNode('menu')
+
+var menuNode = addNode('menu', x=0, y=0)
+menuNode.lock();
+var omNode = addNode('order menu', {'type':'menu'})
 var gridNode = addNode('grid', {'type':'menu'})
 var plusNode = addNode('+', {'type':'menu'})
+
+addEdge(menuNode.id(), gridNode.id())
+addEdge(menuNode.id(), plusNode.id())
+addEdge(menuNode.id(), omNode.id())
+
+
 db.menuCollection = cy.filter('node[type = "menu"]');
 
 menuNode.on('tap', function(event){
@@ -129,30 +172,26 @@ menuNode.on('tap', function(event){
 		m.hide()
 	}
 });
+omNode.on('tap', function(event){
+	orderMenu();
+})
 gridNode.on('tap', function(event){
-	grid();
+	orderDisplay();
 });
 plusNode.on('tap', function(event){
-	addNode('newNode');
-	grid();
+	addNode('newNode', x=1000, y=100);
+	// grid();
 });
 
-// var menu = cy.add([
-// 	{ group: 'nodes', data: { id: 'n0' }, position: { x: 100, y: 100 } },
-// 	{ group: 'nodes', data: { id: 'n1' }, position: { x: 200, y: 200 } },
-// 	{ group: 'edges', data: { id: 'e0', source: 'n0', target: 'n1' } }
-//   ]);
+function ztData() {
+	ztReq('self')
+	ztReq('status')
+	ztReq('peer')
+	ztReq('network')
+	ztReq('moon')
+}
 
-// addNode({
-// 	group: 'nodes', data: { id: 'n0' }, position: { x: 100, y: 100 }
-// },'menu')
-
-// ztReq('self')
-// ztReq('status')
-// ztReq('peer')
-// ztReq('network')
-// ztReq('moon')
-
+ztData();
 
 
 // curl -v --header "X-ZT1-Auth: $(cat /var/lib/zerotier-one/authtoken.secret)" 
