@@ -1,11 +1,14 @@
 console.log('loaded');
 
 
-function getStatus() {
-	fetch('http://127.0.0.1:9993/status', {
+
+
+
+function ztGet(uri) {
+	fetch('http://127.0.0.1:9993/' + uri, {
 		method: 'GET',
 		headers: {
-			'X-ZT1-Auth': 'nagek6netnzqvyxf052qze4y',
+			'X-ZT1-Auth': '',
 		},
 		// mode: 'no-cors',
 		referrer: 'no-referrer'
@@ -29,4 +32,3 @@ function getStatus() {
 		console.warn('Something went wrong.', err);
 	});
 }
-
