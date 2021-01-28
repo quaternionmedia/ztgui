@@ -29,7 +29,7 @@ var cy = cytoscape({
 		  'label': 'data(name)',
 		  'color': '#889988',
 		  'background-color': '#332233',
-		  'shape': 'round-rectangle',
+		  'shape': 'rhomboid',
 		  'background-opacity':0.5
 		}
 	  },
@@ -39,8 +39,29 @@ var cy = cytoscape({
 		  'label': 'data(name)',
 		  'color': '#889988',
 		  'background-color': '#664433',
-		  'shape': 'round-rectangle',
+		  'shape': 'heptagon',
 		  'background-opacity':0.5
+		}
+	  },
+	  {
+		selector: 'node[type = "data"]',
+		style: {
+		  'label': 'data(name)',
+		  'color': '#889988',
+		  'background-color': '#114466',
+		  'shape': 'rectangle',
+		  'background-opacity':0.5
+		}
+	  },
+	  {
+		selector: 'node[type = "detail"]',
+		style: {
+		  'label': 'data(name)',
+		  'color': '#889988',
+		  'background-color': '#119933',
+		  'shape': 'round-rectangle',
+		  'background-opacity':0.5,
+		  'text-wrap':'ellipsis'
 		}
 	  },
 	{
@@ -86,7 +107,8 @@ function addNode(name, data={}, nx=db.x, ny=db.y, locked=false) {
 
 	if(r.type = 'data'){
 		r.on('tap', function(event){
-			addNode(JSON.stringify(r.data()))
+			r2 = addNode(JSON.stringify(r.data()), {'type':'detail'}, x=r.position().x, y=r.position().y+db.g);
+			addEdge(r.id(), r2.id())
 		})
 	}
 	db.dataCollection.push(r)
