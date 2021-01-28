@@ -24,6 +24,26 @@ var cy = cytoscape({
       }
 	},
 	{
+		selector: 'node[type = "menu"]',
+		style: {
+		  'label': 'data(name)',
+		  'color': '#889988',
+		  'background-color': '#332233',
+		  'shape': 'round-rectangle',
+		  'background-opacity':0.5
+		}
+	  },
+	  {
+		selector: 'node[type = "response"]',
+		style: {
+		  'label': 'data(name)',
+		  'color': '#889988',
+		  'background-color': '#664433',
+		  'shape': 'round-rectangle',
+		  'background-opacity':0.5
+		}
+	  },
+	{
 		selector: 'edge',
 		style: {
 		  'label': 'data(id)',
@@ -49,7 +69,8 @@ var db = {
 		'fcose', 'cose-bilkent', 'cose', 'cola', 'cise', 'euler', 'spread'//force-directed
 	],
 	'menuShown':false,
-	'menuCollection':cy.collection()
+	'menuCollection':cy.collection(),
+	'dataCollection':cy.collection()
 };
 
 // Global helpers
@@ -62,6 +83,13 @@ function addNode(name, data={}, nx=db.x, ny=db.y, locked=false) {
 					position: { x: nx, y: ny },
 					locked:locked})
 	ngc++;
+
+	if(r.type = 'data'){
+		r.on('tap', function(event){
+			addNode(JSON.stringify(r.data()))
+		})
+	}
+	db.dataCollection.push(r)
 	return r;	
 }
 
@@ -114,7 +142,7 @@ function ztReq(uri, type="GET") {
 	fetch('http://127.0.0.1:9993/' + uri, {
 		method: type,
 		headers: {
-			'X-ZT1-Auth': 'nagek6netnzqvyxf052qze4y',
+			'X-ZT1-Auth': '',
 		},
 		// mode: 'no-cors',
 		referrer: 'no-referrer'
@@ -130,11 +158,12 @@ function ztReq(uri, type="GET") {
 		// This is the JSON from our response
 		// console.log(resp);
 		var i = 0;
+		addNode(uri, {'type':'response', ...resp})
 		for (var key in resp) {
 			if (resp.hasOwnProperty(key)) {
 				// console.log(key + " -> " + resp[key]);
 				// console.log(resp, key, resp[key])
-				addNode(uri, {'type':'response', ...resp[key]});
+				addNode(uri, {'type':'data', ...resp[key]});
 			}
 			i++;
 		}
@@ -147,6 +176,16 @@ function ztReq(uri, type="GET") {
 	});
 }
 
+function ztData() {
+	ztReq('self')
+	ztReq('status')
+	ztReq('peer')
+	ztReq('network')
+	ztReq('moon')
+}
+
+ztData();
+
 
 var ztgui = addNode('ztgui')
 ztgui.hide();
@@ -157,12 +196,13 @@ var omNode = addNode('order menu', {'type':'menu'})
 var gridNode = addNode('grid', {'type':'menu'})
 var plusNode = addNode('+', {'type':'menu'})
 
-addEdge(menuNode.id(), gridNode.id())
-addEdge(menuNode.id(), plusNode.id())
-addEdge(menuNode.id(), omNode.id())
+// addEdge(menuNode.id(), gridNode.id())
+// addEdge(menuNode.id(), plusNode.id())
+// addEdge(menuNode.id(), omNode.id())
 
 
 db.menuCollection = cy.filter('node[type = "menu"]');
+
 
 menuNode.on('tap', function(event){
 	var m = db.menuCollection
@@ -179,19 +219,12 @@ gridNode.on('tap', function(event){
 	orderDisplay();
 });
 plusNode.on('tap', function(event){
-	addNode('newNode', x=1000, y=100);
-	// grid();
+	addNode('newNode', {'type':'data'}, x=0, y=100);
 });
 
-function ztData() {
-	ztReq('self')
-	ztReq('status')
-	ztReq('peer')
-	ztReq('network')
-	ztReq('moon')
-}
 
-ztData();
+
+
 
 
 // curl -v --header "X-ZT1-Auth: $(cat /var/lib/zerotier-one/authtoken.secret)" 
