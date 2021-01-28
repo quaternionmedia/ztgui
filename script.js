@@ -1,10 +1,11 @@
 console.log('loaded');
 
+
 function getStatus() {
 	fetch('http://127.0.0.1:9993/status', {
 		method: 'GET',
 		headers: {
-			'X-ZT1-Auth': '',
+			'X-ZT1-Auth': 'nagek6netnzqvyxf052qze4y',
 		},
 		// mode: 'no-cors',
 		referrer: 'no-referrer'
@@ -17,6 +18,9 @@ function getStatus() {
 			return Promise.reject(response);
 		}
 	}).then(function (data) {
+		
+		
+
 		// This is the JSON from our response
 		console.log(data);
 		document.getElementById('ztgui').innerHTML = JSON.stringify(data);
@@ -26,4 +30,3 @@ function getStatus() {
 	});
 }
 
-getStatus()
