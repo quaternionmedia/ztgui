@@ -161,7 +161,7 @@ function orderMenu() {
 }
 
 function ztReq(uri, type="GET") {
-	fetch('http://127.0.0.1:9993/' + uri, {
+	fetch('/zt/' + uri, {
 		method: type,
 		headers: {
 			'X-ZT1-Auth': '',

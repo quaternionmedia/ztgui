@@ -21,3 +21,6 @@ Find your zerotier `authtoken.secret`:
 or
 
 `python3 zt.py`
+
+visit: 
+(http://127.0.0.1:9994)
